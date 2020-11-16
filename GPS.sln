@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.1169
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GPS", "GPS\GPS.csproj", "{0A5D4B5F-166E-46B8-936F-49F30D2AE11C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0A5D4B5F-166E-46B8-936F-49F30D2AE11C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A5D4B5F-166E-46B8-936F-49F30D2AE11C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A5D4B5F-166E-46B8-936F-49F30D2AE11C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A5D4B5F-166E-46B8-936F-49F30D2AE11C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0391B36B-D0AD-4E43-880B-394FBFC49E1E}
+	EndGlobalSection
+EndGlobal
