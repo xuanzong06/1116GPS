@@ -733,7 +733,6 @@ namespace GPS
 
 
 /*Create_PetsSalon_datas*/
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -762,18 +761,19 @@ namespace GPS
 
         private void button1_Click(object sender, EventArgs e)
         {
-
+            Save_Pets_Feature();
+            Save_Cost_Items();
         }
 
         #region 寵物的特徵資料
-        private void Get_Pets_Feature()
+        private void Save_Pets_Feature()
         {
             try
             {
                 using (OleDbConnection conn = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=GFS.accdb;Persist Security Info=False;"))
                 {
                     conn.Open();
-                    string sqlcmd = "insert into Pets (pets_colors, pets_lotion, pets_skinConditions, pets_style, pets_comments) values (@pets_colors, @pets_lotion, @pets_skinConditions, @pets_style, @pets_comments)";
+                    string sqlcmd = "insert into Pets (pets_colors, pets_lotion, pets_skinConditions, pets_style, pets_comments, pets_pets_updatedate) values (@pets_colors, @pets_lotion, @pets_skinConditions, @pets_style, @pets_comments, @pets_pets_updatedate)";
                     OleDbCommand cmd = new OleDbCommand(sqlcmd, conn);
 
                     #region SQL Injection prevent
@@ -782,15 +782,61 @@ namespace GPS
                     cmd.Parameters.Add("@pets_skinConditions", OleDbType.VarChar);
                     cmd.Parameters.Add("@pets_style", OleDbType.VarChar);
                     cmd.Parameters.Add("@pets_comments", OleDbType.VarChar);
+                    cmd.Parameters.Add("@pets_pets_updatedate", OleDbType.VarChar);
+
+                    DateTime date1 = DateTime.Now; // yyyy/MM/DD HH:MM:SS
 
                     cmd.Parameters["@pets_colors"].Value = textBox2.Text.Trim();
                     cmd.Parameters["@pets_lotion"].Value = textBox3.Text.Trim();
                     cmd.Parameters["@pets_skinConditions"].Value = textBox4.Text.Trim();
                     cmd.Parameters["@pets_style"].Value = textBox6.Text.Trim();
                     cmd.Parameters["@pets_comments"].Value = textBox5.Text.Trim();
+                    cmd.Parameters["@pets_pets_updatedate"].Value = date1;
                     #endregion
+                    
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("建立特徵資料時出現錯誤");
+            }
+        }
+        #endregion
 
+        #region 費用紀錄
+        private void Save_Cost_Items()
+        {
+            try
+            {
+                using (OleDbConnection conn = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=GFS.accdb;Persist Security Info=False;"))
+                {
+                    conn.Open();
+                    string sqlcmd = "insert into Costs (costs_washOnce, costs_salonOnce, costs_monthlySubScription, costs_bigSalon, costs_noSalon, costs_spatickets, costs_waterHealtickets, costs_pets_index, costs_createdate) values (@costs_washOnce, @costs_salonOnce, @costs_monthlySubScription, @costs_bigSalon, @costs_noSalon, @costs_spatickets, @costs_waterHealtickets, @costs_pets_index, @costs_createdate)";
+                    OleDbCommand cmd = new OleDbCommand(sqlcmd, conn);
+                    #region SQL injection prevent
+                    cmd.Parameters.Add("@costs_washOnce", OleDbType.VarChar);
+                    cmd.Parameters.Add("@costs_salonOnce", OleDbType.VarChar);
+                    cmd.Parameters.Add("@costs_monthlySubScription", OleDbType.VarChar);
+                    cmd.Parameters.Add("@costs_bigSalon", OleDbType.VarChar);
+                    cmd.Parameters.Add("@costs_noSalon", OleDbType.VarChar);
+                    cmd.Parameters.Add("@costs_spatickets", OleDbType.VarChar);
+                    cmd.Parameters.Add("@costs_waterHealtickets", OleDbType.VarChar);
+                    cmd.Parameters.Add("@costs_pets_index", OleDbType.VarChar);
+                    cmd.Parameters.Add("@costs_createdate", OleDbType.VarChar);
 
+                    DateTime date1 = DateTime.Now; // yyyy/MM/DD HH:MM:SS
+
+                    cmd.Parameters["@costs_washOnce"].Value = textBox7.Text.Trim();
+                    cmd.Parameters["@costs_salonOnce"].Value = textBox8.Text.Trim();
+                    cmd.Parameters["@costs_monthlySubScription"].Value = textBox9.Text.Trim();
+                    cmd.Parameters["@costs_bigSalon"].Value = textBox10.Text.Trim();
+                    cmd.Parameters["@costs_noSalon"].Value = textBox11.Text.Trim();
+                    cmd.Parameters["@costs_spatickets"].Value = textBox12.Text.Trim();
+                    cmd.Parameters["@costs_waterHealtickets"].Value = textBox13.Text.Trim();
+                    cmd.Parameters["@costs_pets_index"].Value = pets_index;
+                    cmd.Parameters["@costs_createdate"].Value = date1;
+                    #endregion
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -799,7 +845,7 @@ namespace GPS
 
             }
         }
-        #endregion
+        #endregion 
     }
 }
 
