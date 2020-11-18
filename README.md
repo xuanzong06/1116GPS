@@ -38,7 +38,7 @@ namespace GPS
             }
             catch (Exception ex)
             {
-                MessageBox.Show("建立資料時，出現資料庫連線錯誤，請通知俊億 \r\n" + ex.Message, ToString());
+                MessageBox.Show("建立資料時，出現資料庫連線錯誤，請通知IT \r\n" + ex.Message, ToString());
             }
             #endregion            
         }
