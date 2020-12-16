@@ -1,3 +1,118 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using Excel = Microsoft.Office.Interop.Excel;
+using System.Data.OleDb;
+using System.IO;
+using SharpZip = ICSharpCode.SharpZipLib.Zip; // this one is important
+
+namespace ReadExcelFileApp
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        public DataTable ReadExcel(string FileName, string FileExt)
+        {
+            string Source = string.Empty;
+            DataTable dtexcewl = new DataTable();
+            if(FileExt.CompareTo(".xls") == 0){
+                Source = @"provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + FileName + ";Extended Properties='Excel 8.0;HRD=Yes;IMEX=1';"; //for below excel 2007 
+            }
+            else {
+                Source = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + FileName + ";Extended Properties='Excel 12.0;HDR=Yes';"; //for above excel 2007  
+            }
+
+            using(OleDbConnection conn = new OleDbConnection(Source)){
+                try
+                {
+                    OleDbDataAdapter adapter = new OleDbDataAdapter("select * from [10908$]", conn);
+                    adapter.Fill(dtexcewl);
+                }
+                catch (Exception ex)
+                {
+                    string ex_txt = ex.Message.ToString();
+                }
+            }
+            return dtexcewl;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            string filePath = string.Empty;
+            string fileExt = string.Empty;
+            OpenFileDialog file = new OpenFileDialog();
+            if(file.ShowDialog() == System.Windows.Forms.DialogResult.OK){
+                filePath = file.FileName;
+                fileExt = Path.GetExtension(filePath);
+                if (fileExt.CompareTo(".xls") == 0 || fileExt.CompareTo(".xlsx") == 0 || fileExt.CompareTo(".ods") == 0)
+                {
+                    try
+                    {
+                        DataTable dtExcel = new DataTable();
+                        dtExcel = ReadExcel(filePath, fileExt);
+                        dataGridView1.DataSource = dtExcel;
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message.ToString());
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Please choose .xls or .xlsx file only.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Error); //custom messageBox to show error  
+                }
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            try
+            {
+                if (e.ColumnIndex != 0)
+                {
+                    MessageBox.Show("請點擊【第一個】欄位");
+                }
+                else
+                {
+                    label1.Text = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
+                    label2.Text = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex+1].Value.ToString();
+                    label3.Text = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex+2].Value.ToString();
+                    label4.Text = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex+3].Value.ToString();
+                    label5.Text = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex+4].Value.ToString();
+
+                    label6.Text = dataGridView1.Rows[e.RowIndex+1].Cells[e.ColumnIndex].Value.ToString();
+                    label7.Text = dataGridView1.Rows[e.RowIndex+1].Cells[e.ColumnIndex + 1].Value.ToString();
+                    label8.Text = dataGridView1.Rows[e.RowIndex+1].Cells[e.ColumnIndex + 2].Value.ToString();
+                    label9.Text = dataGridView1.Rows[e.RowIndex+1].Cells[e.ColumnIndex + 3].Value.ToString();
+                    label10.Text = dataGridView1.Rows[e.RowIndex+1].Cells[e.ColumnIndex + 4].Value.ToString();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("錯誤訊息：" +ex.Message.ToString());
+            }
+        }
+    }
+}
+
+
+
+=================================================================================================================================================
 /*Create_Parents_datas*/
 using System;
 /**/
