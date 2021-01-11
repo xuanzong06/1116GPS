@@ -7,6 +7,264 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Sybase.Data.AseClient;
+using System.Drawing.Printing;
+using System.Configuration;
+
+namespace DealMsgPrinter_CS
+{
+    public partial class Form1 : Form
+    {
+        int timeleft = 10; //測試的時候預設120，之後換版請調10s
+        StringBuilder sb = new StringBuilder();
+        StringBuilder filename_Manually = new StringBuilder();
+        string ImportDate;
+        string FileName;
+        String datasource;
+        String port;
+        String database;
+        String uid;
+        String pwd;
+
+
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            if (timeleft == 0)
+            {
+                get_DealMsg(1);
+                timeleft = 600; // 10mins 600s
+            }
+            else
+            {
+                timeleft -= 1;
+                label1.Text = (timeleft).ToString();
+            }
+        }
+
+        private void get_DealMsg(int i)
+        {
+            //string source = "DataSource=10.100.7.77;Port=5000;UID=it01;PWD=it0123;charset=utf8";
+            string source = "Data Source=" + datasource + ";Port=" + port + ";DataBase=" + database + ";UID=" + uid + ";PWD=" + pwd + ";";
+            using (AseConnection conn = new AseConnection(source))
+            {
+                conn.Open();
+                string sqlcmd = "select ImportDate, FileName, FileContent from Kustom..CHB_DealsMsg where PrintStatus = 'X'";
+                AseCommand cmd = new AseCommand(sqlcmd, conn);
+                AseDataReader dr = cmd.ExecuteReader();
+                /**/
+                PrintDialog printDialog1 = null;
+                DialogResult result;
+                if (i == 2) //這一段可以讓訊息是窗不跳出。
+                {
+                    printDialog1 = new PrintDialog();
+                    result = printDialog1.ShowDialog();
+                }
+                else
+                {
+                    result = DialogResult.No;
+                }
+                /**/
+                while (dr.Read())
+                {
+                    sb.Length = 0;
+                    sb.Append(dr.GetString(2));
+                    ImportDate = dr.GetString(0);
+                    FileName = dr.GetString(1);
+                    //20210111 把 Update_Status 放到 printTXT，如果沒印出來應該就不會更新狀態，才能重印。
+                    //sb.Replace("//n", "\r\n");//JAVA已更新，所以用不到
+                    if (i == 1)
+                    {
+                        printTXT(FileName);
+                    }
+                    if (i == 2)
+                    {
+                        //do nothing, only for filename_Manually StringBuilder content~~
+                        filename_Manually.Append("'" + FileName + "',"); //蒐集要update狀態的filename
+                        string s = sb.ToString();
+                        try
+                        {
+                            PrintDocument p = new PrintDocument();
+                            p.PrintPage += delegate(object sender1, PrintPageEventArgs e1)
+                            {
+                                e1.Graphics.DrawString(s, new Font("Times New Roman", 12), new SolidBrush(Color.Black), new RectangleF(0, 0, p.DefaultPageSettings.PrintableArea.Width, p.DefaultPageSettings.PrintableArea.Height));
+                            };
+                            //PrintDialog printDialog1 = new PrintDialog();
+                            printDocument1 = p;
+                            printDialog1.Document = printDocument1;
+
+                            if (result == DialogResult.OK)
+                            {
+                                try
+                                {
+                                    printDocument1.Print();
+                                    string Manually_Filename = filename_Manually.ToString();
+                                    Manually_Filename = Manually_Filename.Remove(Manually_Filename.Length - 1, 1);//去掉最後一個逗號
+                                    Update_Status(Manually_Filename, 2);
+                                }
+                                catch (Exception ex)
+                                {
+                                    MessageBox.Show("Exception Occured While <Manually> Printing" + ex.Message.ToString());
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new Exception("Exception Occured While Printing", ex);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void Update_Status(string FileName, int i)
+        {
+            //string source = "DataSource=10.100.7.77;Port=5000;UID=it01;PWD=it0123;charset=utf8";
+            string source = "Data Source=" + datasource + ";Port=" + port + ";DataBase=" + database + ";UID=" + uid + ";PWD=" + pwd + ";";
+            using (AseConnection conn = new AseConnection(source))
+            {
+                conn.Open();
+                string sqlcmd = null;
+                if (i == 1)
+                {
+                    sqlcmd = "update Kustom..CHB_DealsMsg set PrintStatus = 'V' where FileName = '" + FileName + "'";
+                }
+
+                if (i == 2)
+                {
+                    sqlcmd = "update Kustom..CHB_DealsMsg set PrintStatus = 'V' where FileName in (" + FileName + ")";
+                }
+                AseCommand cmd = new AseCommand(sqlcmd, conn);
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        private void printTXT(string FileName)
+        {
+            string s = sb.ToString();
+            PrintDocument p = new PrintDocument();
+            p.PrintPage += delegate(object sender1, PrintPageEventArgs e1)
+            {
+                e1.Graphics.DrawString(s, new Font("Times New Roman", 12), new SolidBrush(Color.Black), new RectangleF(0, 0, p.DefaultPageSettings.PrintableArea.Width, p.DefaultPageSettings.PrintableArea.Height));
+            };
+            try
+            {
+                p.Print();
+                Update_Status(FileName, 1);//印出後要將交易更新已印過 //20210111 add //逐筆更新
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Exception Occured While Printing", ex);
+            }
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            timer1.Start();
+            getConfig();
+        }
+
+        private int Print_Count(string sqlcmd)
+        {
+            int i = 0;
+            string source = "Data Source=" + datasource + ";Port=" + port + ";DataBase=" + database + ";UID=" + uid + ";PWD=" + pwd + ";";
+            //string source = "DataSource=10.100.7.77;Port=5000;UID=it01;PWD=it0123;charset=utf8";
+            using (AseConnection conn = new AseConnection(source))
+            {
+                conn.Open();
+                AseCommand cmd = new AseCommand(sqlcmd, conn);
+                AseDataReader dr = cmd.ExecuteReader();
+                while (dr.Read())
+                {
+                    i = dr.GetInt32(0);
+                    MessageBox.Show("尚有：【" + i.ToString() + "】份交易資訊未列印");
+                }
+            }
+            return i;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            //這邊要寫逐筆
+            string sqlcmd = "select count(PrintStatus) from Kustom..CHB_DealsMsg where PrintStatus ='X'"; //用來判斷要印幾次
+            int i = Print_Count(sqlcmd);
+            //下午繼續(future work : page break ← key word)
+            if (i == 0)
+            {
+                MessageBox.Show("目前資料庫中的明細都已經列印過了");
+            }
+            else
+            {
+                get_DealMsg(2);
+            }
+        }
+
+        private void getConfig()
+        {
+            datasource = ConfigurationManager.AppSettings["DataSource"];
+            port = ConfigurationManager.AppSettings["Port"];
+            database = ConfigurationManager.AppSettings["DataBase"];
+            uid = ConfigurationManager.AppSettings["UID"];
+            pwd = ConfigurationManager.AppSettings["PWD"];
+        }
+
+        #region 開發過程中用不到的丟這
+        /*沒用到，忽略*/
+        private void printDocument1_PrintPage(object sender, System.Drawing.Printing.PrintPageEventArgs e)
+        {
+            //string s = sb.ToString();
+            //printDocument1.PrintPage += delegate(object sender1, PrintPageEventArgs e1)
+            //{
+            //    e1.Graphics.DrawString(s, new Font("Times New Roman", 12), new SolidBrush(Color.Black), new RectangleF(0, 0, printDocument1.DefaultPageSettings.PrintableArea.Width, printDocument1.DefaultPageSettings.PrintableArea.Height));
+            //};
+            //try
+            //{
+            //    //printDocument1.Print();
+            //    Update_Status(FileName);//印出後要將交易更新已印過 //20210111 add
+            //}
+            //catch (Exception ex)
+            //{
+            //    throw new Exception("Exception Occured While Printing", ex);
+            //}
+        }
+
+        private PrintDocument get_Deal_Msg_Manually()
+        {
+            try
+            {
+                get_DealMsg(2);
+                string s = sb.ToString();
+                MessageBox.Show(s);
+                PrintDocument p = new PrintDocument();
+                p.PrintPage += delegate(object sender1, PrintPageEventArgs e1)
+                {
+                    e1.Graphics.DrawString(s, new Font("Times New Roman", 12), new SolidBrush(Color.Black), new RectangleF(0, 0, p.DefaultPageSettings.PrintableArea.Width, p.DefaultPageSettings.PrintableArea.Height));
+                };
+                return p;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Exception Occured While Printing", ex);
+            }
+        }
+        #endregion
+    }
+}
+
+============================================================================================================================
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using Excel = Microsoft.Office.Interop.Excel;
 using System.Data.OleDb;
 using System.IO;
