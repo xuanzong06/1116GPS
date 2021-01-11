@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -48,7 +49,7 @@ namespace DealMsgPrinter_CS
 
         private void get_DealMsg(int i)
         {
-            //string source = "DataSource=10.100.7.77;Port=5000;UID=it01;PWD=it0123;charset=utf8";
+            
             string source = "Data Source=" + datasource + ";Port=" + port + ";DataBase=" + database + ";UID=" + uid + ";PWD=" + pwd + ";";
             using (AseConnection conn = new AseConnection(source))
             {
@@ -123,7 +124,7 @@ namespace DealMsgPrinter_CS
 
         private void Update_Status(string FileName, int i)
         {
-            //string source = "DataSource=10.100.7.77;Port=5000;UID=it01;PWD=it0123;charset=utf8";
+            
             string source = "Data Source=" + datasource + ";Port=" + port + ";DataBase=" + database + ";UID=" + uid + ";PWD=" + pwd + ";";
             using (AseConnection conn = new AseConnection(source))
             {
@@ -172,7 +173,7 @@ namespace DealMsgPrinter_CS
         {
             int i = 0;
             string source = "Data Source=" + datasource + ";Port=" + port + ";DataBase=" + database + ";UID=" + uid + ";PWD=" + pwd + ";";
-            //string source = "DataSource=10.100.7.77;Port=5000;UID=it01;PWD=it0123;charset=utf8";
+            
             using (AseConnection conn = new AseConnection(source))
             {
                 conn.Open();
@@ -254,7 +255,6 @@ namespace DealMsgPrinter_CS
         #endregion
     }
 }
-
 ============================================================================================================================
 using System;
 using System.Collections.Generic;
