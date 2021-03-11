@@ -1,5 +1,7 @@
+股票名稱	現價	集保_昨餘	集保_買_委	集保_買_成	集保_賣_委	集保_賣_成	集保_今餘	零股_昨餘	零股_買_委	零股_買_成	零股_賣_委	零股_賣_成	零股_今餘	現值	融資_昨餘	融資_買_委	融資_買_成	融資_賣_委	融資_賣_成	融資_今餘	融券_昨餘	融券_買_委	融券_買_成	融券_賣_委	融券_賣_成	融券_今餘
+																										
+stockname	now_price	custody_yester_balance	custody_buy_appoint	custody_buy_deal	custody_sell_appoint	custody_sell_deal	custody_today_balance	oddshare_yester_balance	oddshare_buy_appoint	oddshare_buy_deal	oddshare_sell_appoint	oddshare_sell_deal	oddshare_today_balance	now_value	financing_yester_balance	financing_buy_appoint	financing_buy_deal	financing_sell_appoint	financing_sell_deal	financing_today_balance	securities_yester_balance	securities_buy_appoint	securities_buy_deal	securities_sell_appoint	securities_sell_deal	securities_today_balance
 
-![Uploading image.png…]()
 
 ===========================
 using System;
